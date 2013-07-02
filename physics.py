@@ -30,6 +30,7 @@ class Ball(object):
 		self.width, self.height = 5, 5
 		self.vy = 0
 		self.enable = True
+		self.vDir, self.hDir = 0, 0
 		
 	def update(self):
 		if self.enable:
@@ -37,11 +38,23 @@ class Ball(object):
 		else:
 			self.vy = 0
 		self.x += self.vx
-		self.y += self.vy
+		self.y += self.vy*0.75
+		self.setDirection()
 		
 	def render(self, screen):
 		py.draw.circle(screen, (0, 0, 255), (int(self.x), int(self.y)), 5)
-		
+	
+	def setDirection(self):
+		if self.vy > 0:
+			self.vDir = 0
+		else:
+			self.vDir = 1
+			
+		if self.vx > 0:
+			self.hDir = 1
+		else:
+			self.hDir = 2
+			
 def main():
 	py.init()
 	screen = py.display.set_mode((800, 600))
@@ -70,12 +83,23 @@ def main():
 def updateBalls(balls, screen, collision, rectangle):
 	for ball in balls:
 		if collision.check(ball, rectangle):
-			ball.enable = False
-			ball.y = rectangle.y - ball.height
-		else:
-			ball.enable = True
-		if ball.y > 600 or ball.x > 800 or ball.x < 0:
-			balls.remove(ball)
+			if ball.vDir == 0:
+				ball.vy = -ball.vy
+			elif ball.vDir == 1:
+				ball.vy = -ball.vy
+				
+		if collision.check(ball, rectangle):	
+			if ball.vDir == 1:
+				ball.vx = -ball.vx
+			elif ball.vDir == 2:
+				ball.vx = -ball.vx
+			
+		if ball.y >= 600:
+			ball.y = 600 - 5
+			ball.vy = -ball.vy
+		if ball.x < 5 or ball.x > 795:
+			ball.vx = -ball.vx
+			
 		for ball2 in balls:
 			if ball != ball2:
 				if collision.check_c(ball, ball2):
